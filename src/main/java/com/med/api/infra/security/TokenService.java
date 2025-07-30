@@ -17,16 +17,31 @@ public class TokenService {
     @Value("${api.security.token.secret}")
     private String secret;
 
+    private static final String ISSUER = "API com.med";
+
     public String gerarToken(Usuario usuario) {
         try {
             var algoritmo = Algorithm.HMAC256(secret);
             return JWT.create()
-                    .withIssuer("API com.med")
+                    .withIssuer(ISSUER)
                     .withSubject(usuario.getLogin())
                     .withExpiresAt(dataExpiracao())
                     .sign(algoritmo);
         } catch (JWTCreationException exception){
             throw new RuntimeException("Erro ao gerar JWT", exception);
+        }
+    }
+
+    public String getSubject(String token) {
+        try {
+            var algoritmo = Algorithm.HMAC256(secret);
+            return JWT.require(algoritmo)
+                    .withIssuer(ISSUER)
+                    .build()
+                    .verify(token)
+                    .getSubject();
+        } catch (JWTCreationException exception){
+            throw new RuntimeException("Token inválido ou expirado.", exception);
         }
     }
 
