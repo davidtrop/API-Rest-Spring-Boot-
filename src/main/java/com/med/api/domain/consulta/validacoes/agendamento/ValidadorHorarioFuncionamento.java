@@ -1,11 +1,13 @@
-package com.med.api.domain.consulta.validacoes;
+package com.med.api.domain.consulta.validacoes.agendamento;
 
 import com.med.api.domain.consulta.DadosAgendamentoConsulta;
 import jakarta.validation.ValidationException;
+import org.springframework.stereotype.Component;
 
 import java.time.DayOfWeek;
 
-public class ValidadorHorarioFuncionamento {
+@Component
+public class ValidadorHorarioFuncionamento implements ValidadorAgendamentoConsulta {
 
     public void validar(DadosAgendamentoConsulta dados){
         var dataConsulta = dados.data();

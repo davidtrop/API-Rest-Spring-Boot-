@@ -1,12 +1,16 @@
 package com.med.api.domain.consulta;
 
 
+import com.med.api.domain.consulta.validacoes.agendamento.ValidadorAgendamentoConsulta;
+import com.med.api.domain.consulta.validacoes.cancelamento.ValidadorCancelamentoDeConsulta;
 import com.med.api.domain.medico.Medico;
 import com.med.api.domain.medico.MedicoRepository;
 import com.med.api.domain.paciente.PacienteRepository;
 import jakarta.validation.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class AgendaDeConsultas {
@@ -20,7 +24,13 @@ public class AgendaDeConsultas {
     @Autowired
     private PacienteRepository pacienteRepository;
 
-    public void  agendar(DadosAgendamentoConsulta dados){
+    @Autowired
+    private List<ValidadorAgendamentoConsulta> validadores;
+
+    @Autowired
+    private List<ValidadorCancelamentoDeConsulta> validadoresCancelamento;
+
+    public DadosDetalhamentoConsulta  agendar(DadosAgendamentoConsulta dados){
 
         if ((dados.idMedico() != null) && !medicoRepository.existsById(dados.idMedico())){
             throw new ValidationException("Id do médico informado não existe.");
@@ -30,12 +40,16 @@ public class AgendaDeConsultas {
             throw new ValidationException("Id do paciente informado não existe.");
         }
 
+        validadores.forEach(v->v.validar(dados));
+
         var medico   = escolharMedico(dados);
         var paciente = pacienteRepository.findById(dados.idPaciente()).get();
 
         var consulta = new Consulta(null, medico, paciente, dados.data(), null);
 
         repository.save(consulta);
+
+        return new DadosDetalhamentoConsulta(consulta);
     }
 
     private Medico escolharMedico(DadosAgendamentoConsulta dados) {
@@ -55,7 +69,10 @@ public class AgendaDeConsultas {
             throw new ValidationException("Id da consulta informado não existe!");
         }
 
+        validadoresCancelamento.forEach(v -> v.validar(dados));
+
         var consulta = repository.getReferenceById(dados.idConsulta());
         consulta.cancelar(dados.motivo());
     }
+
 }

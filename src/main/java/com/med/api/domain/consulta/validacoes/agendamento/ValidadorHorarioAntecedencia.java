@@ -1,11 +1,13 @@
-package com.med.api.domain.consulta.validacoes;
+package com.med.api.domain.consulta.validacoes.agendamento;
 
 import com.med.api.domain.consulta.DadosAgendamentoConsulta;
 import jakarta.validation.ValidationException;
+import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 
+@Component("ValidadorHorarioAntecedenciaAgendamento")
 public class ValidadorHorarioAntecedencia {
 
     public void validar(DadosAgendamentoConsulta dados){
